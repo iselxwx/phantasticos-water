@@ -107,9 +107,9 @@
         <div id="raw-PH" class="raw">Esperando conexión...</div>
       </div>
       <div class="card connect-card">
-        <h3>Arduino EC / TDS / Temp</h3>
-        <p class="small">Debe mandar: <b>EC:820,TDS:410,TEMP:24.8</b>.</p>
-        <button class="primary" onclick="connectArduino('EC_TEMP')">Conectar EC/Temp</button>
+        <h3>Arduino EC / TDS</h3>
+        <p class="small">Debe mandar: <b>EC:820,TDS:410</b>. También acepta <b>TEMP:24.8</b> si tu Arduino lo manda.</p>
+        <button class="primary" onclick="connectArduino('EC_TEMP')">Conectar EC/TDS</button>
         <button onclick="disconnectArduino('EC_TEMP')">Desconectar</button>
         <div id="raw-EC_TEMP" class="raw">Esperando conexión...</div>
       </div>
@@ -124,7 +124,7 @@
 
     <section class="grid">
       <div class="card metric"><div class="label">pH</div><div id="ph" class="value">--</div><span id="phs" class="status gris">sin dato</span><p id="phm" class="small"></p></div>
-      <div class="card metric"><div class="label">Temperatura</div><div id="temp" class="value">--</div><span id="temps" class="status gris">sin dato</span><p id="tempm" class="small"></p></div>
+      <div class="card metric"><div class="label">Temperatura</div><div id="temp" class="value">--</div><span id="temps" class="status gris">opcional</span><p id="tempm" class="small"></p></div>
       <div class="card metric"><div class="label">EC</div><div id="ec" class="value">--</div><span id="ecs" class="status gris">sin dato</span><p id="ecm" class="small"></p></div>
       <div class="card metric"><div class="label">TDS</div><div id="tds" class="value">--</div><span id="tdss" class="status gris">sin dato</span><p id="tdsm" class="small"></p></div>
       <div class="card metric"><div class="label">Turbidez</div><div id="turb" class="value">--</div><span id="turbs" class="status gris">sin dato</span><p id="turbm" class="small"></p></div>
@@ -230,15 +230,36 @@ function loginOrRegister(){
 function parseLine(line, etiqueta){
   if(!line.trim()) return;
   $(`raw-${etiqueta}`).textContent = line;
-  const equivalencias = { 'PH':'PH', 'P H':'PH', 'TEMP':'TEMP', 'TEMPERATURA':'TEMP', 'EC':'EC', 'TDS':'TDS', 'TURB':'TURB', 'TURBIDEZ':'TURB' };
+
+  const equivalencias = {
+    'PH':'PH',
+    'P H':'PH',
+    'TEMP':'TEMP',
+    'TEMPERATURA':'TEMP',
+    'EC':'EC',
+    'TDS':'TDS',
+    'TURB':'TURB',
+    'TURBIDEZ':'TURB'
+  };
+
   const texto = line.toUpperCase();
   const regex = /([A-ZÁÉÍÓÚÑ ]+)\s*:\s*(-?\d+(?:\.\d+)?)/g;
   let match;
+  let encontroAlgo = false;
+
   while((match = regex.exec(texto)) !== null){
     const nombre = match[1].trim();
     const valor = parseFloat(match[2]);
-    if(equivalencias[nombre]) datos[equivalencias[nombre]] = valor;
+    if(equivalencias[nombre]){
+      datos[equivalencias[nombre]] = valor;
+      encontroAlgo = true;
+    }
   }
+
+  if(!encontroAlgo){
+    $(`raw-${etiqueta}`).textContent = line + '\nFormato no reconocido. Ejemplo: EC:820,TDS:410';
+  }
+
   refreshUI();
 }
 
@@ -249,7 +270,10 @@ async function connectArduino(etiqueta){
   }
   try{
     const port = await navigator.serial.requestPort();
+
+    // Si tu Arduino tiene Serial.begin(115200), cambia 9600 por 115200 aquí.
     await port.open({ baudRate: 9600 });
+
     ports[etiqueta] = port;
     $(`raw-${etiqueta}`).textContent = 'Conectado. Leyendo datos...';
     readLoop(etiqueta, port);
@@ -294,7 +318,11 @@ async function disconnectArduino(etiqueta){
 }
 
 function evaluarParametro(nombre, valor){
-  if(valor === null || valor === undefined) return { estado:'sin dato', clase:'gris', mensaje:'Todavía no se recibió lectura de este sensor.' };
+  if(valor === null || valor === undefined){
+    if(nombre === 'TEMP') return { estado:'opcional', clase:'gris', mensaje:'No se recibió temperatura. No pasa nada: este dato es opcional.' };
+    return { estado:'sin dato', clase:'gris', mensaje:'Todavía no se recibió lectura de este sensor.' };
+  }
+
   if(nombre === 'PH'){
     if(valor >= RANGOS.PH_MIN && valor <= RANGOS.PH_MAX) return { estado:'normal', clase:'ok', mensaje:'pH dentro del rango esperado.' };
     if(valor < RANGOS.PH_MIN) return { estado:'alerta', clase:'bad', mensaje:'pH bajo: el agua está más ácida de lo esperado.' };
@@ -351,12 +379,15 @@ function analizarAgua(){
     recomendaciones.push('Dejar reposar, filtrar y repetir la medición de turbidez.');
   }
 
-  const faltantes = Object.entries(datos).filter(([k,v]) => v === null).map(([k]) => k);
+  // TEMP ya NO es obligatorio. Solo se necesitan PH, EC, TDS y TURB.
+  const sensoresRequeridos = ['PH', 'EC', 'TDS', 'TURB'];
+  const faltantes = sensoresRequeridos.filter(k => datos[k] === null);
+
   let resultado, explicacion, frase_grande;
   if(faltantes.length){
     resultado = 'ANALIZANDO';
-    explicacion = 'Todavía faltan datos de: ' + faltantes.join(', ') + '.';
-    frase_grande = 'Conecta todos los sensores para completar el análisis.';
+    explicacion = 'Todavía faltan datos de: ' + faltantes.join(', ') + '. La temperatura es opcional.';
+    frase_grande = 'Conecta los sensores necesarios para completar el análisis.';
   } else if(datos.TURB !== null && datos.TURB > RANGOS.TURB_MUY_ALTA){
     resultado = 'AGUA NO SANA PARA BEBER';
     explicacion = 'La turbidez está demasiado alta, así que el agua no se considera limpia aunque el pH esté bien.';
@@ -371,9 +402,10 @@ function analizarAgua(){
     frase_grande = 'Esta muestra necesita revisión antes de considerarse segura.';
   } else {
     resultado = 'AGUA DENTRO DEL RANGO';
-    explicacion = 'Todos los parámetros recibidos están dentro de los rangos configurados del prototipo.';
+    explicacion = 'Todos los parámetros requeridos están dentro de los rangos configurados del prototipo.';
     frase_grande = 'Esta agua se ve dentro del rango del prototipo, pero no confirma potabilidad real.';
   }
+
   if(!recomendaciones.length) recomendaciones.push('Registrar varias mediciones y mantener los sensores calibrados.');
   return { resultado, explicacion, frase_grande, problemas, recomendaciones, detalle };
 }
