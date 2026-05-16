@@ -1,500 +1,245 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AquaPanel Phantásticos</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
-    :root{
-      --bg:#eaf7ff;
-      --card:#ffffffd9;
-      --blue:#65bff5;
-      --deep:#164e86;
-      --soft:#dff4ff;
-      --ok:#159947;
-      --bad:#dc3b3b;
-      --warn:#f59e0b;
-      --text:#17324d;
-      --muted:#5f7893;
-    }
-    *{box-sizing:border-box}
     body{
       margin:0;
-      font-family:'Segoe UI',Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top left,#b8ecff 0,transparent 30%),
-        radial-gradient(circle at top right,#d8f3ff 0,transparent 25%),
-        linear-gradient(180deg,#eaf7ff 0%,#f7fcff 100%);
-      min-height:100vh;
+      font-family:Arial,sans-serif;
+      background:#eaf7ff;
+      color:#123b63;
     }
-    .nav{max-width:1180px;margin:auto;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-    .brand{font-size:26px;font-weight:900;color:var(--deep)}
-    .brand span{font-size:30px}
-    .nav-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    button,.btn{
-      border:0;background:white;color:var(--deep);padding:10px 14px;border-radius:999px;text-decoration:none;font-weight:800;box-shadow:0 6px 18px #9dd6f650;cursor:pointer
+
+    .nav{
+      background:white;
+      padding:15px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      box-shadow:0 2px 10px rgba(0,0,0,.1);
     }
-    button.primary{background:#4aaee8;color:white}
-    button.danger{background:#fee2e2;color:#991b1b}
-    button:disabled{opacity:.55;cursor:not-allowed}
-    .wrap{max-width:1180px;margin:auto;padding:10px 22px 35px}
+
+    .logo{
+      font-size:24px;
+      font-weight:bold;
+    }
+
     .hero{
-      background:linear-gradient(135deg,#ffffffdd,#dff4ffdd);border:1px solid white;border-radius:34px;padding:30px;box-shadow:0 18px 40px #93c5fd44;display:grid;grid-template-columns:1.35fr .8fr;gap:20px;align-items:center
+      padding:30px;
+      text-align:center;
     }
-    .bubble{display:inline-block;background:#bdeaff;color:#14517f;border-radius:999px;padding:8px 14px;font-weight:800;margin-bottom:10px}
-    h1{font-size:42px;margin:8px 0;color:#123b63;line-height:1.05}
-    .big-result{font-size:27px;font-weight:900;padding:20px;border-radius:24px;background:white;margin-top:18px;box-shadow:inset 0 0 0 2px #e0f2fe}
-    .limpia{color:var(--ok)} .sucia{color:var(--bad)} .obs{color:var(--warn)} .analizando{color:#2563eb}
-    .mascot{text-align:center;font-size:88px;background:white;border-radius:32px;padding:28px;box-shadow:0 15px 35px #7dd3fc55}
-    .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:15px;margin-top:22px}
-    .card{background:var(--card);backdrop-filter:blur(10px);border:1px solid white;border-radius:28px;padding:20px;box-shadow:0 10px 28px #93c5fd33}
-    .metric .label{font-weight:900;color:#56708c;font-size:15px}
-    .metric .value{font-size:32px;font-weight:900;color:#102a43;margin:8px 0}
-    .status{font-size:13px;border-radius:999px;padding:7px 10px;display:inline-block;font-weight:900}
-    .ok{background:#dcfce7;color:#166534}.bad{background:#fee2e2;color:#991b1b}.warn{background:#fef3c7;color:#92400e}.gris{background:#f1f5f9;color:#475569}
-    .two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}
-    h2{margin:0 0 12px;color:#123b63}
-    ul{margin:0;padding-left:20px} li{margin:8px 0;line-height:1.4}
-    .history{margin-top:20px;overflow:auto}
-    table{width:100%;border-collapse:collapse;min-width:900px}
-    th,td{padding:12px;border-bottom:1px solid #dbeafe;text-align:left;font-size:14px;vertical-align:top}
-    th{color:#315f89;background:#f0f9ff;position:sticky;top:0}
-    .small{font-size:14px;color:var(--muted);line-height:1.5}
-    .pill{display:inline-block;background:#dff4ff;color:#14517f;padding:7px 10px;border-radius:999px;margin:4px;font-weight:800;font-size:13px}
-    .note{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:12px;border-radius:18px;margin-top:14px}
-    .panel-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
-    .connect-card h3{margin:0 0 8px;color:#123b63}
-    .connect-card .raw{font-family:Consolas,monospace;background:#f8fafc;border-radius:14px;padding:10px;margin-top:10px;color:#334155;min-height:45px;white-space:pre-wrap;font-size:13px}
-    .login-modal{position:fixed;inset:0;background:#0f172a80;display:none;align-items:center;justify-content:center;padding:20px;z-index:9}
-    .login-modal.show{display:flex}
-    .formcard{width:min(430px,92vw);background:white;padding:28px;border-radius:30px;box-shadow:0 18px 45px #0f172a66}
-    input{width:100%;padding:13px;border-radius:16px;border:1px solid #bfdbfe;margin:8px 0 14px;font-size:16px}
-    .formcard h2{font-size:28px}
-    .form-actions{display:flex;gap:10px;flex-wrap:wrap}
-    .hidden{display:none!important}
-    @media(max-width:900px){.hero,.two{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.panel-actions{grid-template-columns:1fr}h1{font-size:32px}}
+
+    .hero h1{
+      font-size:40px;
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+      gap:20px;
+      padding:20px;
+    }
+
+    .card{
+      background:white;
+      border-radius:20px;
+      padding:20px;
+      box-shadow:0 5px 15px rgba(0,0,0,.1);
+    }
+
+    button{
+      background:#3ba9f4;
+      color:white;
+      border:none;
+      padding:12px 20px;
+      border-radius:12px;
+      cursor:pointer;
+      margin-top:10px;
+    }
+
+    .graphs{
+      padding:20px;
+    }
+
+    canvas{
+      background:white;
+      border-radius:20px;
+      padding:10px;
+      margin-bottom:20px;
+    }
+
+    .section{
+      background:white;
+      margin:20px;
+      padding:20px;
+      border-radius:20px;
+    }
+
+    @media(max-width:768px){
+      .hero h1{
+        font-size:28px;
+      }
+    }
   </style>
 </head>
 <body>
+
   <div class="nav">
-    <div class="brand"><span>💧</span> AquaPanel Phantásticos</div>
-    <div class="nav-actions">
-      <span id="user-pill" class="pill hidden"></span>
-      <button id="login-btn">Iniciar sesión</button>
-      <button id="logout-btn" class="danger hidden">Cerrar sesión</button>
+    <div class="logo">AquaPanel Phantásticos</div>
+  </div>
+
+  <section class="hero">
+    <h1>Monitoreo del agua</h1>
+    <p>Proyecto para analizar parámetros del agua usando Arduino y kits químicos.</p>
+  </section>
+
+  <section class="cards">
+
+    <div class="card">
+      <h2>pH</h2>
+      <h1 id="ph">--</h1>
+      <button>Conectar pH</button>
     </div>
-  </div>
 
-  <div class="wrap">
-    <section class="hero">
-      <div>
-        <span class="bubble">Panel público con conexión directa desde Chrome/Edge</span>
-        <h1>Monitoreo inteligente de calidad del agua</h1>
-        <p class="small">Cada persona puede abrir esta página, iniciar sesión y conectar sus propios Arduinos desde su computadora.</p>
-        <div id="resultado" class="big-result analizando">Conecta tus Arduinos para empezar el análisis.</div>
-        <p id="explicacion" class="small"></p>
-      </div>
-      <div class="mascot">🫧💙<br><span style="font-size:22px;font-weight:900;color:#2563eb">AquaBot</span></div>
-    </section>
-
-    <section class="panel-actions">
-      <div class="card connect-card">
-        <h3>Arduino pH</h3>
-        <p class="small">Debe mandar: <b>PH:7.2</b> o texto que incluya <b>pH: 7.2</b>.</p>
-        <button class="primary" onclick="connectArduino('PH')">Conectar pH</button>
-        <button onclick="disconnectArduino('PH')">Desconectar</button>
-        <div id="raw-PH" class="raw">Esperando conexión...</div>
-      </div>
-      <div class="card connect-card">
-        <h3>Arduino EC / TDS</h3>
-        <p class="small">Debe mandar: <b>EC:820,TDS:410</b>. También acepta <b>TEMP:24.8</b> si tu Arduino lo manda.</p>
-        <button class="primary" onclick="connectArduino('EC_TEMP')">Conectar EC/TDS</button>
-        <button onclick="disconnectArduino('EC_TEMP')">Desconectar</button>
-        <div id="raw-EC_TEMP" class="raw">Esperando conexión...</div>
-      </div>
-      <div class="card connect-card">
-        <h3>Arduino Turbidez</h3>
-        <p class="small">Debe mandar: <b>TURB:350</b> o <b>Turbidez:350</b>.</p>
-        <button class="primary" onclick="connectArduino('TURBIDEZ')">Conectar Turbidez</button>
-        <button onclick="disconnectArduino('TURBIDEZ')">Desconectar</button>
-        <div id="raw-TURBIDEZ" class="raw">Esperando conexión...</div>
-      </div>
-    </section>
-
-    <section class="grid">
-      <div class="card metric"><div class="label">pH</div><div id="ph" class="value">--</div><span id="phs" class="status gris">sin dato</span><p id="phm" class="small"></p></div>
-      <div class="card metric"><div class="label">Temperatura</div><div id="temp" class="value">--</div><span id="temps" class="status gris">opcional</span><p id="tempm" class="small"></p></div>
-      <div class="card metric"><div class="label">EC</div><div id="ec" class="value">--</div><span id="ecs" class="status gris">sin dato</span><p id="ecm" class="small"></p></div>
-      <div class="card metric"><div class="label">TDS</div><div id="tds" class="value">--</div><span id="tdss" class="status gris">sin dato</span><p id="tdsm" class="small"></p></div>
-      <div class="card metric"><div class="label">Turbidez</div><div id="turb" class="value">--</div><span id="turbs" class="status gris">sin dato</span><p id="turbm" class="small"></p></div>
-    </section>
-
-    <section class="two">
-      <div class="card"><h2>¿Por qué dio ese resultado?</h2><ul id="problemas"></ul></div>
-      <div class="card"><h2>Recomendaciones</h2><ul id="recomendaciones"></ul><div class="note">Aviso: este prototipo no certifica agua potable; clasifica según sensores y rangos configurados.</div></div>
-    </section>
-
-    <section class="card history">
-      <h2>Registro de mediciones</h2>
-      <p id="history-note" class="small">Inicia sesión para guardar historial en este navegador.</p>
-      <button onclick="exportCSV()">Exportar CSV</button>
-      <button class="danger" onclick="clearHistory()">Borrar mi historial</button>
-      <table>
-        <thead><tr><th>Hora</th><th>Resultado</th><th>pH</th><th>Temp</th><th>EC</th><th>TDS</th><th>Turbidez</th><th>Explicación</th></tr></thead>
-        <tbody id="historial"></tbody>
-      </table>
-    </section>
-  </div>
-
-  <div id="login-modal" class="login-modal">
-    <div class="formcard">
-      <h2>💧 Cuenta local</h2>
-      <p class="small">Esta cuenta se guarda en este navegador. Para una base de datos real online, luego se conecta con Firebase/Supabase.</p>
-      <label>Usuario</label>
-      <input id="username" placeholder="ej. isel" />
-      <label>Contraseña</label>
-      <input id="password" type="password" placeholder="mínimo 4 caracteres" />
-      <div class="form-actions">
-        <button class="primary" onclick="loginOrRegister()">Entrar / Crear cuenta</button>
-        <button onclick="closeLogin()">Cancelar</button>
-      </div>
-      <p id="login-error" class="small" style="color:#b91c1c"></p>
+    <div class="card">
+      <h2>EC</h2>
+      <h1 id="ec">--</h1>
+      <button>Conectar EC</button>
     </div>
-  </div>
 
-<script>
-const RANGOS = {
-  PH_MIN: 6.5,
-  PH_MAX: 8.5,
-  TEMP_MIN: 5,
-  TEMP_MAX: 35,
-  EC_MAX: 1000,
-  TDS_MAX: 500,
-  TURB_MAX: 600,
-  TURB_MUY_ALTA: 750,
-};
+    <div class="card">
+      <h2>TDS</h2>
+      <h1 id="tds">--</h1>
+      <button>Conectar TDS</button>
+    </div>
 
-let datos = { PH:null, TEMP:null, EC:null, TDS:null, TURB:null };
-let ports = { PH:null, EC_TEMP:null, TURBIDEZ:null };
-let readers = { PH:null, EC_TEMP:null, TURBIDEZ:null };
-let currentUser = localStorage.getItem('aquapanel_user') || null;
-let lastSavedSignature = '';
-let lastSavedAt = 0;
+    <div class="card">
+      <h2>Turbidez</h2>
+      <h1 id="turb">--</h1>
+      <button>Conectar Turbidez</button>
+    </div>
 
-const $ = id => document.getElementById(id);
+  </section>
 
-function storageUsers(){ return JSON.parse(localStorage.getItem('aquapanel_users') || '{}'); }
-function saveUsers(users){ localStorage.setItem('aquapanel_users', JSON.stringify(users)); }
-function historyKey(){ return currentUser ? `aquapanel_history_${currentUser}` : null; }
-function getHistory(){ const k = historyKey(); return k ? JSON.parse(localStorage.getItem(k) || '[]') : []; }
-function setHistory(items){ const k = historyKey(); if(k) localStorage.setItem(k, JSON.stringify(items)); }
+  <section class="section">
+    <h2>Kit químico</h2>
 
-function updateUserUI(){
-  if(currentUser){
-    $('user-pill').textContent = `Hola, ${currentUser}`;
-    $('user-pill').classList.remove('hidden');
-    $('logout-btn').classList.remove('hidden');
-    $('login-btn').classList.add('hidden');
-    $('history-note').textContent = 'Tu historial se guarda solo en tu cuenta local de este navegador.';
-  } else {
-    $('user-pill').classList.add('hidden');
-    $('logout-btn').classList.add('hidden');
-    $('login-btn').classList.remove('hidden');
-    $('history-note').textContent = 'Inicia sesión para guardar historial en este navegador.';
-  }
-  renderHistory();
-}
+    <label>¿Tienes kit?</label>
 
-$('login-btn').onclick = () => $('login-modal').classList.add('show');
-$('logout-btn').onclick = () => { currentUser = null; localStorage.removeItem('aquapanel_user'); updateUserUI(); };
-function closeLogin(){ $('login-modal').classList.remove('show'); }
+    <select id="kitSelect">
+      <option>No tengo</option>
+      <option>Marca 1</option>
+      <option>Marca 2</option>
+    </select>
 
-function loginOrRegister(){
-  const username = $('username').value.trim().toLowerCase();
-  const password = $('password').value;
-  const error = $('login-error');
-  error.textContent = '';
-  if(username.length < 3 || password.length < 4){ error.textContent = 'Usuario mínimo 3 letras y contraseña mínimo 4 caracteres.'; return; }
-  const users = storageUsers();
-  if(users[username] && users[username] !== password){ error.textContent = 'Contraseña incorrecta para ese usuario.'; return; }
-  if(!users[username]){ users[username] = password; saveUsers(users); }
-  currentUser = username;
-  localStorage.setItem('aquapanel_user', username);
-  $('username').value = '';
-  $('password').value = '';
-  closeLogin();
-  updateUserUI();
-}
+    <br><br>
 
-function parseLine(line, etiqueta){
-  if(!line.trim()) return;
-  $(`raw-${etiqueta}`).textContent = line;
+    <label>Color obtenido</label>
 
-  const equivalencias = {
-    'PH':'PH',
-    'P H':'PH',
-    'TEMP':'TEMP',
-    'TEMPERATURA':'TEMP',
-    'EC':'EC',
-    'TDS':'TDS',
-    'TURB':'TURB',
-    'TURBIDEZ':'TURB'
-  };
+    <select id="colorKit">
+      <option>Verde</option>
+      <option>Amarillo</option>
+      <option>Rojo</option>
+      <option>Naranja</option>
+    </select>
+  </section>
 
-  const texto = line.toUpperCase();
-  const regex = /([A-ZÁÉÍÓÚÑ ]+)\s*:\s*(-?\d+(?:\.\d+)?)/g;
-  let match;
-  let encontroAlgo = false;
+  <section class="section">
+    <h2>Posibles microorganismos</h2>
 
-  while((match = regex.exec(texto)) !== null){
-    const nombre = match[1].trim();
-    const valor = parseFloat(match[2]);
-    if(equivalencias[nombre]){
-      datos[equivalencias[nombre]] = valor;
-      encontroAlgo = true;
-    }
-  }
+    <ul>
+      <li>E. coli</li>
+      <li>Giardia</li>
+      <li>Salmonella</li>
+      <li>Coliformes</li>
+    </ul>
+  </section>
 
-  if(!encontroAlgo){
-    $(`raw-${etiqueta}`).textContent = line + '\nFormato no reconocido. Ejemplo: EC:820,TDS:410';
-  }
+  <section class="section">
+    <h2>Soluciones o alternativas</h2>
 
-  refreshUI();
-}
+    <ul>
+      <li>Hervir el agua</li>
+      <li>Usar filtros</li>
+      <li>Clorar correctamente</li>
+      <li>Usar agua embotellada</li>
+    </ul>
+  </section>
 
-async function connectArduino(etiqueta){
-  if(!('serial' in navigator)){
-    alert('Tu navegador no soporta Web Serial. Usa Chrome o Edge en computadora y abre la página con HTTPS.');
-    return;
-  }
-  try{
-    const port = await navigator.serial.requestPort();
+  <section class="section">
+    <h2>Nuestro proyecto</h2>
 
-    // Si tu Arduino tiene Serial.begin(115200), cambia 9600 por 115200 aquí.
-    await port.open({ baudRate: 9600 });
+    <p>
+      Nuestro proyecto busca ayudar a monitorear la calidad del agua mediante sensores y kits químicos para generar conciencia y prevenir riesgos.
+    </p>
+  </section>
 
-    ports[etiqueta] = port;
-    $(`raw-${etiqueta}`).textContent = 'Conectado. Leyendo datos...';
-    readLoop(etiqueta, port);
-  } catch(err){
-    $(`raw-${etiqueta}`).textContent = 'No se pudo conectar: ' + err.message;
-  }
-}
+  <section class="graphs">
 
-async function readLoop(etiqueta, port){
-  const decoder = new TextDecoderStream();
-  const readableClosed = port.readable.pipeTo(decoder.writable);
-  const reader = decoder.readable.getReader();
-  readers[etiqueta] = reader;
-  let buffer = '';
-  try{
-    while(true){
-      const { value, done } = await reader.read();
-      if(done) break;
-      buffer += value;
-      const lines = buffer.split(/\r?\n/);
-      buffer = lines.pop();
-      lines.forEach(line => parseLine(line, etiqueta));
-    }
-  } catch(err){
-    $(`raw-${etiqueta}`).textContent = 'Lectura detenida: ' + err.message;
-  } finally {
-    reader.releaseLock();
-    await readableClosed.catch(()=>{});
-  }
-}
+    <h2>Gráficas</h2>
 
-async function disconnectArduino(etiqueta){
-  try{
-    if(readers[etiqueta]) await readers[etiqueta].cancel();
-    if(ports[etiqueta]) await ports[etiqueta].close();
-    ports[etiqueta] = null;
-    readers[etiqueta] = null;
-    $(`raw-${etiqueta}`).textContent = 'Desconectado.';
-  }catch(err){
-    $(`raw-${etiqueta}`).textContent = 'Error al desconectar: ' + err.message;
-  }
-}
+    <canvas id="chartPH"></canvas>
+    <canvas id="chartEC"></canvas>
+    <canvas id="chartTDS"></canvas>
+    <canvas id="chartTURB"></canvas>
 
-function evaluarParametro(nombre, valor){
-  if(valor === null || valor === undefined){
-    if(nombre === 'TEMP') return { estado:'opcional', clase:'gris', mensaje:'No se recibió temperatura. No pasa nada: este dato es opcional.' };
-    return { estado:'sin dato', clase:'gris', mensaje:'Todavía no se recibió lectura de este sensor.' };
-  }
+  </section>
 
-  if(nombre === 'PH'){
-    if(valor >= RANGOS.PH_MIN && valor <= RANGOS.PH_MAX) return { estado:'normal', clase:'ok', mensaje:'pH dentro del rango esperado.' };
-    if(valor < RANGOS.PH_MIN) return { estado:'alerta', clase:'bad', mensaje:'pH bajo: el agua está más ácida de lo esperado.' };
-    return { estado:'alerta', clase:'bad', mensaje:'pH alto: el agua está más alcalina de lo esperado.' };
-  }
-  if(nombre === 'TEMP'){
-    if(valor >= RANGOS.TEMP_MIN && valor <= RANGOS.TEMP_MAX) return { estado:'normal', clase:'ok', mensaje:'Temperatura normal para la medición.' };
-    return { estado:'alerta', clase:'warn', mensaje:'Temperatura fuera del rango esperado; puede afectar otras lecturas.' };
-  }
-  if(nombre === 'EC'){
-    if(valor <= RANGOS.EC_MAX) return { estado:'normal', clase:'ok', mensaje:'EC dentro del rango configurado.' };
-    return { estado:'alerta', clase:'bad', mensaje:'EC alta: puede indicar muchas sales o minerales disueltos.' };
-  }
-  if(nombre === 'TDS'){
-    if(valor <= RANGOS.TDS_MAX) return { estado:'normal', clase:'ok', mensaje:'TDS dentro del rango configurado.' };
-    return { estado:'alerta', clase:'bad', mensaje:'TDS alto: hay demasiados sólidos disueltos.' };
-  }
-  if(nombre === 'TURB'){
-    if(valor <= RANGOS.TURB_MAX) return { estado:'normal', clase:'ok', mensaje:'Turbidez dentro del rango configurado.' };
-    return { estado:'alerta', clase:'bad', mensaje:'Turbidez alta: hay muchas partículas suspendidas.' };
-  }
-  return { estado:'sin dato', clase:'gris', mensaje:'Sin evaluación.' };
-}
+  <script>
 
-function analizarAgua(){
-  const problemas = [];
-  const recomendaciones = [];
-  const detalle = {
-    PH: evaluarParametro('PH', datos.PH),
-    TEMP: evaluarParametro('TEMP', datos.TEMP),
-    EC: evaluarParametro('EC', datos.EC),
-    TDS: evaluarParametro('TDS', datos.TDS),
-    TURB: evaluarParametro('TURB', datos.TURB),
-  };
+    const labels = ['1','2','3','4','5'];
 
-  if(datos.PH !== null && (datos.PH < RANGOS.PH_MIN || datos.PH > RANGOS.PH_MAX)){
-    problemas.push(`pH fuera de rango: ${datos.PH}. El pH por sí solo no confirma que el agua sea segura.`);
-    recomendaciones.push('Calibrar el sensor de pH y repetir la medición con una muestra limpia de referencia.');
-  }
-  if(datos.TEMP !== null && (datos.TEMP < RANGOS.TEMP_MIN || datos.TEMP > RANGOS.TEMP_MAX)){
-    problemas.push(`Temperatura fuera de rango: ${datos.TEMP} °C.`);
-    recomendaciones.push('Esperar a que el sensor se estabilice y volver a medir.');
-  }
-  if(datos.EC !== null && datos.EC > RANGOS.EC_MAX){
-    problemas.push(`EC alta: ${datos.EC} µS/cm. Puede haber exceso de sales o minerales disueltos.`);
-    recomendaciones.push('Comparar EC contra agua filtrada o de referencia.');
-  }
-  if(datos.TDS !== null && datos.TDS > RANGOS.TDS_MAX){
-    problemas.push(`TDS alto: ${datos.TDS} ppm. Hay demasiados sólidos disueltos.`);
-    recomendaciones.push('Filtrar la muestra y repetir la lectura de TDS.');
-  }
-  if(datos.TURB !== null && datos.TURB > RANGOS.TURB_MAX){
-    problemas.push(`Turbidez alta: ${datos.TURB}. Hay partículas suspendidas visibles o no visibles.`);
-    recomendaciones.push('Dejar reposar, filtrar y repetir la medición de turbidez.');
-  }
+    new Chart(document.getElementById('chartPH'), {
+      type:'line',
+      data:{
+        labels,
+        datasets:[{
+          label:'pH',
+          data:[7,7.1,7.3,7.2,7.4]
+        }]
+      }
+    });
 
-  // TEMP ya NO es obligatorio. Solo se necesitan PH, EC, TDS y TURB.
-  const sensoresRequeridos = ['PH', 'EC', 'TDS', 'TURB'];
-  const faltantes = sensoresRequeridos.filter(k => datos[k] === null);
+    new Chart(document.getElementById('chartEC'), {
+      type:'line',
+      data:{
+        labels,
+        datasets:[{
+          label:'EC',
+          data:[300,320,310,330,340]
+        }]
+      }
+    });
 
-  let resultado, explicacion, frase_grande;
-  if(faltantes.length){
-    resultado = 'ANALIZANDO';
-    explicacion = 'Todavía faltan datos de: ' + faltantes.join(', ') + '. La temperatura es opcional.';
-    frase_grande = 'Conecta los sensores necesarios para completar el análisis.';
-  } else if(datos.TURB !== null && datos.TURB > RANGOS.TURB_MUY_ALTA){
-    resultado = 'AGUA NO SANA PARA BEBER';
-    explicacion = 'La turbidez está demasiado alta, así que el agua no se considera limpia aunque el pH esté bien.';
-    frase_grande = 'Esta agua no es sana para beber porque tiene demasiadas partículas suspendidas.';
-  } else if(problemas.length >= 2){
-    resultado = 'AGUA NO SANA PARA BEBER';
-    explicacion = 'Hay varios parámetros fuera de rango; eso indica posible contaminación o mala calidad.';
-    frase_grande = 'Esta agua no es sana para beber porque varios parámetros salieron alterados.';
-  } else if(problemas.length === 1){
-    resultado = 'AGUA EN OBSERVACIÓN';
-    explicacion = 'Solo un parámetro salió fuera de rango. Conviene repetir la medición y revisar la calibración.';
-    frase_grande = 'Esta muestra necesita revisión antes de considerarse segura.';
-  } else {
-    resultado = 'AGUA DENTRO DEL RANGO';
-    explicacion = 'Todos los parámetros requeridos están dentro de los rangos configurados del prototipo.';
-    frase_grande = 'Esta agua se ve dentro del rango del prototipo, pero no confirma potabilidad real.';
-  }
+    new Chart(document.getElementById('chartTDS'), {
+      type:'line',
+      data:{
+        labels,
+        datasets:[{
+          label:'TDS',
+          data:[150,180,170,160,190]
+        }]
+      }
+    });
 
-  if(!recomendaciones.length) recomendaciones.push('Registrar varias mediciones y mantener los sensores calibrados.');
-  return { resultado, explicacion, frase_grande, problemas, recomendaciones, detalle };
-}
+    new Chart(document.getElementById('chartTURB'), {
+      type:'line',
+      data:{
+        labels,
+        datasets:[{
+          label:'Turbidez',
+          data:[20,25,30,28,35]
+        }]
+      }
+    });
 
-function clsResultado(t){
-  if(t.includes('NO SANA')) return 'big-result sucia';
-  if(t.includes('OBSERVACIÓN')) return 'big-result obs';
-  if(t.includes('DENTRO')) return 'big-result limpia';
-  return 'big-result analizando';
-}
-function val(v,u=''){ return v === null || v === undefined ? '--' : v + u; }
-function setDetalle(prefix, d){ $(prefix+'s').textContent=d.estado; $(prefix+'s').className='status '+d.clase; $(prefix+'m').textContent=d.mensaje; }
-function lista(id, arr, vacio){ const ul=$(id); ul.innerHTML=''; (arr&&arr.length?arr:[vacio]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); }); }
+  </script>
 
-function refreshUI(){
-  const a = analizarAgua();
-  $('resultado').textContent = a.frase_grande;
-  $('resultado').className = clsResultado(a.resultado);
-  $('explicacion').textContent = a.explicacion;
-  $('ph').textContent = val(datos.PH);
-  $('temp').textContent = val(datos.TEMP,' °C');
-  $('ec').textContent = val(datos.EC,' µS/cm');
-  $('tds').textContent = val(datos.TDS,' ppm');
-  $('turb').textContent = val(datos.TURB);
-  setDetalle('ph',a.detalle.PH); setDetalle('temp',a.detalle.TEMP); setDetalle('ec',a.detalle.EC); setDetalle('tds',a.detalle.TDS); setDetalle('turb',a.detalle.TURB);
-  lista('problemas',a.problemas,'No hay problemas detectados con los rangos actuales.');
-  lista('recomendaciones',a.recomendaciones,'Sin recomendaciones por ahora.');
-  saveHistoryIfNeeded(a);
-  renderHistory();
-}
-
-function saveHistoryIfNeeded(a){
-  if(!currentUser) return;
-  if(Object.values(datos).every(v => v === null)) return;
-  const signature = JSON.stringify({datos, resultado:a.resultado});
-  const now = Date.now();
-  if(signature === lastSavedSignature && now - lastSavedAt < 20000) return;
-  const item = {
-    fecha: new Date().toLocaleString(), resultado:a.resultado, explicacion:a.explicacion,
-    ph:datos.PH, temp:datos.TEMP, ec:datos.EC, tds:datos.TDS, turb:datos.TURB
-  };
-  const hist = getHistory();
-  hist.unshift(item);
-  setHistory(hist.slice(0,100));
-  lastSavedSignature = signature;
-  lastSavedAt = now;
-}
-
-function renderHistory(){
-  const tbody = $('historial');
-  tbody.innerHTML = '';
-  const hist = getHistory();
-  if(!currentUser){
-    tbody.innerHTML = '<tr><td colspan="8">Inicia sesión para ver y guardar tu historial.</td></tr>';
-    return;
-  }
-  if(!hist.length){
-    tbody.innerHTML = '<tr><td colspan="8">Aún no hay mediciones guardadas.</td></tr>';
-    return;
-  }
-  hist.forEach(x=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML = `<td>${x.fecha}</td><td>${x.resultado}</td><td>${x.ph ?? '--'}</td><td>${x.temp ?? '--'}</td><td>${x.ec ?? '--'}</td><td>${x.tds ?? '--'}</td><td>${x.turb ?? '--'}</td><td>${x.explicacion}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-function clearHistory(){
-  if(!currentUser) return alert('Inicia sesión primero.');
-  if(confirm('¿Borrar tu historial local?')){ setHistory([]); renderHistory(); }
-}
-
-function exportCSV(){
-  if(!currentUser) return alert('Inicia sesión primero.');
-  const hist = getHistory();
-  const rows = [['fecha','resultado','ph','temp','ec','tds','turb','explicacion'], ...hist.map(x => [x.fecha,x.resultado,x.ph??'',x.temp??'',x.ec??'',x.tds??'',x.turb??'',x.explicacion])];
-  const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `aquapanel_${currentUser}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-updateUserUI();
-refreshUI();
-</script>
 </body>
 </html>
-
