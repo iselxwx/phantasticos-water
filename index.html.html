@@ -69,16 +69,11 @@
     .login-modal{position:fixed;inset:0;background:#0f172a80;display:none;align-items:center;justify-content:center;padding:20px;z-index:9}
     .login-modal.show{display:flex}
     .formcard{width:min(430px,92vw);background:white;padding:28px;border-radius:30px;box-shadow:0 18px 45px #0f172a66}
-    input,select{width:100%;padding:13px;border-radius:16px;border:1px solid #bfdbfe;margin:8px 0 14px;font-size:16px;background:white}
-    .kit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
-    .kit-result{background:#eefaff;border:1px solid #bae6fd;color:#14517f;padding:14px;border-radius:18px;margin-top:10px;font-weight:800;line-height:1.45}
-    .organism-list{display:grid;gap:10px}
-    .organism-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:12px}
-    .organism-item b{color:#123b63}
+    input{width:100%;padding:13px;border-radius:16px;border:1px solid #bfdbfe;margin:8px 0 14px;font-size:16px}
     .formcard h2{font-size:28px}
     .form-actions{display:flex;gap:10px;flex-wrap:wrap}
     .hidden{display:none!important}
-    @media(max-width:900px){.hero,.two{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.panel-actions,.kit-grid{grid-template-columns:1fr}h1{font-size:32px}}
+    @media(max-width:900px){.hero,.two{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.panel-actions{grid-template-columns:1fr}h1{font-size:32px}}
   </style>
 </head>
 <body>
@@ -95,8 +90,8 @@
     <section class="hero">
       <div>
         <span class="bubble">Panel público con conexión directa desde Chrome/Edge</span>
-        <h1>Monitoreo de calidad del agua</h1>
-        <p class="small">Cada persona puede abrir esta página, iniciar sesión y conectar sus propios Arduinos desde su computadora.</p>
+        <h1>Monitoreo inteligente de calidad del agua</h1>
+        <p class="small">Cada persona puede abrir esta página, iniciar sesión y conectar sus propios Arduinos desde su computadora. No necesita Python ni terminal.</p>
         <div id="resultado" class="big-result analizando">Conecta tus Arduinos para empezar el análisis.</div>
         <p id="explicacion" class="small"></p>
       </div>
@@ -112,9 +107,9 @@
         <div id="raw-PH" class="raw">Esperando conexión...</div>
       </div>
       <div class="card connect-card">
-        <h3>Arduino EC / TDS</h3>
-        <p class="small">Debe mandar: <b>EC:820,TDS:410</b>. También acepta <b>TEMP:24.8</b> si tu Arduino lo manda.</p>
-        <button class="primary" onclick="connectArduino('EC_TEMP')">Conectar EC/TDS</button>
+        <h3>Arduino EC / TDS / Temp</h3>
+        <p class="small">Debe mandar: <b>EC:820,TDS:410,TEMP:24.8</b>.</p>
+        <button class="primary" onclick="connectArduino('EC_TEMP')">Conectar EC/Temp</button>
         <button onclick="disconnectArduino('EC_TEMP')">Desconectar</button>
         <div id="raw-EC_TEMP" class="raw">Esperando conexión...</div>
       </div>
@@ -127,45 +122,9 @@
       </div>
     </section>
 
-    <section class="kit-grid">
-      <div class="card connect-card">
-        <h3>Kit de tiras reactivas</h3>
-        <p class="small">Los sensores no detectan todo. Puede haber microorganismos aunque pH, EC, TDS y turbidez salgan bien.</p>
-        <label>¿Tienes tu kit?</label>
-        <select id="kit-tiene" onchange="updateKitOptions()">
-          <option value="NO">No tengo</option>
-          <option value="SI">Sí tengo</option>
-        </select>
-        <div id="kit-options" class="hidden">
-          <label>Modelo / marca del kit</label>
-          <select id="kit-marca" onchange="refreshUI()">
-            <option value="Varify">Varify Complete Water Test Kit</option>
-            <option value="JNW">JNW Direct Drinking Water Test Strips</option>
-          </select>
-          <label>Color o resultado que te salió</label>
-          <select id="kit-color" onchange="refreshUI()">
-            <option value="NEGATIVO">Negativo / color seguro según la guía</option>
-            <option value="DUDA">Color dudoso o intermedio</option>
-            <option value="POSITIVO">Positivo / color de alerta según la guía</option>
-          </select>
-        </div>
-        <div id="kit-resultado" class="kit-result">Sin kit: se analizará solo con los Arduinos.</div>
-      </div>
-
-      <div class="card">
-        <h2>Organismos posibles</h2>
-        <div id="organismos" class="organism-list"></div>
-      </div>
-
-      <div class="card">
-        <h2>Soluciones o alternativas</h2>
-        <ul id="soluciones"></ul>
-      </div>
-    </section>
-
     <section class="grid">
       <div class="card metric"><div class="label">pH</div><div id="ph" class="value">--</div><span id="phs" class="status gris">sin dato</span><p id="phm" class="small"></p></div>
-      <div class="card metric"><div class="label">Temperatura</div><div id="temp" class="value">--</div><span id="temps" class="status gris">opcional</span><p id="tempm" class="small"></p></div>
+      <div class="card metric"><div class="label">Temperatura</div><div id="temp" class="value">--</div><span id="temps" class="status gris">sin dato</span><p id="tempm" class="small"></p></div>
       <div class="card metric"><div class="label">EC</div><div id="ec" class="value">--</div><span id="ecs" class="status gris">sin dato</span><p id="ecm" class="small"></p></div>
       <div class="card metric"><div class="label">TDS</div><div id="tds" class="value">--</div><span id="tdss" class="status gris">sin dato</span><p id="tdsm" class="small"></p></div>
       <div class="card metric"><div class="label">Turbidez</div><div id="turb" class="value">--</div><span id="turbs" class="status gris">sin dato</span><p id="turbm" class="small"></p></div>
@@ -191,7 +150,7 @@
   <div id="login-modal" class="login-modal">
     <div class="formcard">
       <h2>💧 Cuenta local</h2>
-      <p class="small">Esta cuenta se guarda en este navegador.</p>
+      <p class="small">Esta cuenta se guarda en este navegador. Para una base de datos real online, luego se conecta con Firebase/Supabase.</p>
       <label>Usuario</label>
       <input id="username" placeholder="ej. isel" />
       <label>Contraseña</label>
@@ -217,7 +176,6 @@ const RANGOS = {
 };
 
 let datos = { PH:null, TEMP:null, EC:null, TDS:null, TURB:null };
-let kit = { tiene:'NO', marca:'', color:'NEGATIVO' };
 let ports = { PH:null, EC_TEMP:null, TURBIDEZ:null };
 let readers = { PH:null, EC_TEMP:null, TURBIDEZ:null };
 let currentUser = localStorage.getItem('aquapanel_user') || null;
@@ -272,36 +230,15 @@ function loginOrRegister(){
 function parseLine(line, etiqueta){
   if(!line.trim()) return;
   $(`raw-${etiqueta}`).textContent = line;
-
-  const equivalencias = {
-    'PH':'PH',
-    'P H':'PH',
-    'TEMP':'TEMP',
-    'TEMPERATURA':'TEMP',
-    'EC':'EC',
-    'TDS':'TDS',
-    'TURB':'TURB',
-    'TURBIDEZ':'TURB'
-  };
-
+  const equivalencias = { 'PH':'PH', 'P H':'PH', 'TEMP':'TEMP', 'TEMPERATURA':'TEMP', 'EC':'EC', 'TDS':'TDS', 'TURB':'TURB', 'TURBIDEZ':'TURB' };
   const texto = line.toUpperCase();
   const regex = /([A-ZÁÉÍÓÚÑ ]+)\s*:\s*(-?\d+(?:\.\d+)?)/g;
   let match;
-  let encontroAlgo = false;
-
   while((match = regex.exec(texto)) !== null){
     const nombre = match[1].trim();
     const valor = parseFloat(match[2]);
-    if(equivalencias[nombre]){
-      datos[equivalencias[nombre]] = valor;
-      encontroAlgo = true;
-    }
+    if(equivalencias[nombre]) datos[equivalencias[nombre]] = valor;
   }
-
-  if(!encontroAlgo){
-    $(`raw-${etiqueta}`).textContent = line + '\nFormato no reconocido. Ejemplo: EC:820,TDS:410';
-  }
-
   refreshUI();
 }
 
@@ -312,10 +249,7 @@ async function connectArduino(etiqueta){
   }
   try{
     const port = await navigator.serial.requestPort();
-
-    // Si tu Arduino tiene Serial.begin(115200), cambia 9600 por 115200 aquí.
     await port.open({ baudRate: 9600 });
-
     ports[etiqueta] = port;
     $(`raw-${etiqueta}`).textContent = 'Conectado. Leyendo datos...';
     readLoop(etiqueta, port);
@@ -360,11 +294,7 @@ async function disconnectArduino(etiqueta){
 }
 
 function evaluarParametro(nombre, valor){
-  if(valor === null || valor === undefined){
-    if(nombre === 'TEMP') return { estado:'opcional', clase:'gris', mensaje:'No se recibió temperatura. No pasa nada: este dato es opcional.' };
-    return { estado:'sin dato', clase:'gris', mensaje:'Todavía no se recibió lectura de este sensor.' };
-  }
-
+  if(valor === null || valor === undefined) return { estado:'sin dato', clase:'gris', mensaje:'Todavía no se recibió lectura de este sensor.' };
   if(nombre === 'PH'){
     if(valor >= RANGOS.PH_MIN && valor <= RANGOS.PH_MAX) return { estado:'normal', clase:'ok', mensaje:'pH dentro del rango esperado.' };
     if(valor < RANGOS.PH_MIN) return { estado:'alerta', clase:'bad', mensaje:'pH bajo: el agua está más ácida de lo esperado.' };
@@ -389,70 +319,9 @@ function evaluarParametro(nombre, valor){
   return { estado:'sin dato', clase:'gris', mensaje:'Sin evaluación.' };
 }
 
-
-function updateKitOptions(){
-  kit.tiene = $('kit-tiene').value;
-  $('kit-options').classList.toggle('hidden', kit.tiene !== 'SI');
-  refreshUI();
-}
-
-function leerKit(){
-  kit.tiene = $('kit-tiene') ? $('kit-tiene').value : 'NO';
-  kit.marca = $('kit-marca') ? $('kit-marca').value : '';
-  kit.color = $('kit-color') ? $('kit-color').value : 'NEGATIVO';
-  if(kit.tiene !== 'SI'){
-    return { estado:'SIN_KIT', texto:'Sin kit: se analizará solo con los Arduinos.', riesgo:0 };
-  }
-  if(kit.color === 'POSITIVO'){
-    return { estado:'ALERTA', texto:`De acuerdo a tus parámetros y al color que salió en el kit ${kit.marca}, hay alerta microbiológica. El agua no debe considerarse segura para beber.`, riesgo:2 };
-  }
-  if(kit.color === 'DUDA'){
-    return { estado:'DUDA', texto:`De acuerdo a tus parámetros y al color que salió en el kit ${kit.marca}, el resultado es dudoso. Conviene repetir la prueba o usar una prueba más específica.`, riesgo:1 };
-  }
-  return { estado:'OK', texto:`De acuerdo a tus parámetros y al color que salió en el kit ${kit.marca}, no aparece alerta en la tira. Aun así, el prototipo no certifica potabilidad real.`, riesgo:0 };
-}
-
-function organismosSegunKit(kitInfo, problemas){
-  if(kitInfo.estado === 'SIN_KIT'){
-    return [
-      {nombre:'Bacterias coliformes', texto:'Pueden aparecer por contaminación fecal o agua mal almacenada. No siempre cambian pH, EC o TDS.'},
-      {nombre:'E. coli', texto:'Es una señal importante de contaminación fecal. Puede estar presente aunque el agua se vea clara.'},
-      {nombre:'Giardia o Cryptosporidium', texto:'Son protozoarios que pueden estar en agua contaminada; una tira simple puede no detectarlos siempre.'}
-    ];
-  }
-  if(kitInfo.estado === 'ALERTA'){
-    return [
-      {nombre:'Coliformes totales', texto:'Posibles bacterias indicadoras de contaminación en el sistema o recipiente.'},
-      {nombre:'E. coli', texto:'Puede indicar contaminación fecal y el agua no debe tomarse sin tratamiento adecuado.'},
-      {nombre:'Otros microorganismos', texto:'También podrían existir virus, protozoarios u hongos que requieren pruebas más completas.'}
-    ];
-  }
-  if(kitInfo.estado === 'DUDA' || problemas.length){
-    return [
-      {nombre:'Coliformes o bacterias ambientales', texto:'El resultado dudoso o parámetros alterados justifican repetir medición y comparar con agua de referencia.'},
-      {nombre:'Microorganismos no detectados por sensores', texto:'pH, TDS, EC y turbidez ayudan, pero no identifican microorganismos directamente.'}
-    ];
-  }
-  return [
-    {nombre:'Riesgo bajo en el prototipo', texto:'No hay alerta con los datos actuales, pero solo un laboratorio puede confirmar potabilidad.'}
-  ];
-}
-
-function solucionesSegunAnalisis(resultado, kitInfo, problemas){
-  const base = ['No beber el agua si hay alerta, olor extraño, color raro o resultado positivo/dudoso del kit.'];
-  if(resultado.includes('NO SANA') || kitInfo.estado === 'ALERTA'){
-    return [...base, 'Usar agua embotellada o de una fuente confiable mientras se confirma la calidad.', 'Hervir el agua antes de uso doméstico cuando sea posible y seguro hacerlo con supervisión adulta.', 'Filtrar y repetir mediciones; si sigue alterada, pedir una prueba de laboratorio o apoyo de una autoridad local.'];
-  }
-  if(resultado.includes('OBSERVACIÓN') || kitInfo.estado === 'DUDA' || problemas.length){
-    return [...base, 'Repetir la medición con sensores calibrados y una muestra nueva.', 'Comparar con una muestra de agua filtrada o conocida como referencia.', 'Revisar que recipientes, cables y sensores estén limpios antes de medir.'];
-  }
-  return ['Mantener sensores calibrados y hacer varias mediciones en distintos momentos.', 'Guardar historial para comparar cambios.', 'Usar un kit microbiológico o prueba de laboratorio si el agua será para beber.'];
-}
-
 function analizarAgua(){
   const problemas = [];
   const recomendaciones = [];
-  const kitInfo = leerKit();
   const detalle = {
     PH: evaluarParametro('PH', datos.PH),
     TEMP: evaluarParametro('TEMP', datos.TEMP),
@@ -482,15 +351,12 @@ function analizarAgua(){
     recomendaciones.push('Dejar reposar, filtrar y repetir la medición de turbidez.');
   }
 
-  // TEMP ya NO es obligatorio. Solo se necesitan PH, EC, TDS y TURB.
-  const sensoresRequeridos = ['PH', 'EC', 'TDS', 'TURB'];
-  const faltantes = sensoresRequeridos.filter(k => datos[k] === null);
-
+  const faltantes = Object.entries(datos).filter(([k,v]) => v === null).map(([k]) => k);
   let resultado, explicacion, frase_grande;
   if(faltantes.length){
     resultado = 'ANALIZANDO';
-    explicacion = 'Todavía faltan datos de: ' + faltantes.join(', ') + '. La temperatura es opcional.';
-    frase_grande = 'Conecta los sensores necesarios para completar el análisis.';
+    explicacion = 'Todavía faltan datos de: ' + faltantes.join(', ') + '.';
+    frase_grande = 'Conecta todos los sensores para completar el análisis.';
   } else if(datos.TURB !== null && datos.TURB > RANGOS.TURB_MUY_ALTA){
     resultado = 'AGUA NO SANA PARA BEBER';
     explicacion = 'La turbidez está demasiado alta, así que el agua no se considera limpia aunque el pH esté bien.';
@@ -505,30 +371,11 @@ function analizarAgua(){
     frase_grande = 'Esta muestra necesita revisión antes de considerarse segura.';
   } else {
     resultado = 'AGUA DENTRO DEL RANGO';
-    explicacion = 'Todos los parámetros requeridos están dentro de los rangos configurados del prototipo.';
+    explicacion = 'Todos los parámetros recibidos están dentro de los rangos configurados del prototipo.';
     frase_grande = 'Esta agua se ve dentro del rango del prototipo, pero no confirma potabilidad real.';
   }
-
-  if(kitInfo.estado === 'ALERTA'){
-    resultado = 'AGUA NO SANA PARA BEBER';
-    explicacion = kitInfo.texto + ' Los sensores ayudan, pero el kit marcó posible riesgo microbiológico.';
-    frase_grande = 'Esta agua no es sana para beber según la combinación de sensores y kit.';
-    problemas.push('El kit marcó un color de alerta microbiológica.');
-    recomendaciones.push('No beber esta muestra y confirmar con una prueba más completa.');
-  } else if(kitInfo.estado === 'DUDA' && !resultado.includes('NO SANA')){
-    resultado = 'AGUA EN OBSERVACIÓN';
-    explicacion = kitInfo.texto + ' Repite la prueba antes de considerarla segura.';
-    frase_grande = 'Esta muestra necesita revisión por el resultado dudoso del kit.';
-    problemas.push('El kit dio un color dudoso o intermedio.');
-  } else if(kitInfo.estado === 'OK' && resultado.includes('DENTRO')){
-    explicacion = kitInfo.texto + ' Los sensores también salieron dentro del rango configurado.';
-    frase_grande = 'De acuerdo a tus parámetros y al color que salió, el agua se ve saludable en el prototipo.';
-  }
-
-  const organismos = organismosSegunKit(kitInfo, problemas);
-  const soluciones = solucionesSegunAnalisis(resultado, kitInfo, problemas);
   if(!recomendaciones.length) recomendaciones.push('Registrar varias mediciones y mantener los sensores calibrados.');
-  return { resultado, explicacion, frase_grande, problemas, recomendaciones, detalle, kitInfo, organismos, soluciones };
+  return { resultado, explicacion, frase_grande, problemas, recomendaciones, detalle };
 }
 
 function clsResultado(t){
@@ -540,7 +387,6 @@ function clsResultado(t){
 function val(v,u=''){ return v === null || v === undefined ? '--' : v + u; }
 function setDetalle(prefix, d){ $(prefix+'s').textContent=d.estado; $(prefix+'s').className='status '+d.clase; $(prefix+'m').textContent=d.mensaje; }
 function lista(id, arr, vacio){ const ul=$(id); ul.innerHTML=''; (arr&&arr.length?arr:[vacio]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); }); }
-function renderOrganismos(items){ const box=$('organismos'); box.innerHTML=''; items.forEach(o=>{ const div=document.createElement('div'); div.className='organism-item'; div.innerHTML=`<b>${o.nombre}</b><br><span class="small">${o.texto}</span>`; box.appendChild(div); }); }
 
 function refreshUI(){
   const a = analizarAgua();
@@ -553,11 +399,8 @@ function refreshUI(){
   $('tds').textContent = val(datos.TDS,' ppm');
   $('turb').textContent = val(datos.TURB);
   setDetalle('ph',a.detalle.PH); setDetalle('temp',a.detalle.TEMP); setDetalle('ec',a.detalle.EC); setDetalle('tds',a.detalle.TDS); setDetalle('turb',a.detalle.TURB);
-  $('kit-resultado').textContent = a.kitInfo.texto;
   lista('problemas',a.problemas,'No hay problemas detectados con los rangos actuales.');
   lista('recomendaciones',a.recomendaciones,'Sin recomendaciones por ahora.');
-  lista('soluciones',a.soluciones,'Sin soluciones por ahora.');
-  renderOrganismos(a.organismos);
   saveHistoryIfNeeded(a);
   renderHistory();
 }
@@ -622,4 +465,3 @@ refreshUI();
 </script>
 </body>
 </html>
-
